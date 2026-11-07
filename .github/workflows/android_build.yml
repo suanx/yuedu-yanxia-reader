@@ -15,7 +15,8 @@ on:
         options: [apk, aab]
 
 permissions:
-  contents: read
+  contents: write   # 发布 Release 让手机能直接下载 APK
+  actions: read
 
 env:
   KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -159,8 +160,24 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # Artifact 是 zip 且需要登录，手机不方便；这里把 APK 直接挂到
+      # Release 上，浏览器打开链接即可下载安装。
+      - name: 发布 Release（手机可直接下载）
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG="v1.0.0"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" yuedu-yanxia.apk \
+            --title "檐下 · Yanxia Reader 安装包" \
+            --notes "带 debug 签名，安卓手机下载后可直接安装。每次推送自动更新此版本。"
+          echo "RELEASE_URL=https://github.com/${{ github.repository }}/releases/download/$TAG/yuedu-yanxia.apk"
+
       - name: 构建小结
         run: |
           echo "## 檐下 · Yanxia Reader 构建完成" >> "$GITHUB_STEP_SUMMARY"
           echo "- APK 带 debug 签名，可直接安装" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 下载：本页 Artifacts → yuedu-yanxia" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 手机下载：https://github.com/${{ github.repository }}/releases/download/v1.0.0/yuedu-yanxia.apk" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 安装：浏览器下载后点开 APK，按提示允许「安装未知来源应用」即可" >> "$GITHUB_STEP_SUMMARY"
