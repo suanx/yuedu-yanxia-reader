@@ -38,22 +38,28 @@ jobs:
           channel: stable
           cache: true
 
-      - name: 补全 Android Gradle Wrapper
+      - name: 补全 Android 骨架（gradlew / wrapper jar / settings.gradle）
         run: |
-          set -e
-          TMP="$(mktemp -d)"
+          set -euxo pipefail
+          # Flutter 3.24 的 android 模板是 Groovy，且 gradlew / gradle-wrapper.jar
+          # 属于生成物、不入库，这里用官方命令在项目根补齐。
+          # 先备份定制的构建脚本与 Manifest，避免 flutter create 覆盖。
+          BK="$(mktemp -d)"
+          cp android/app/build.gradle "$BK/app.gradle"
+          cp android/build.gradle "$BK/build.gradle"
+          cp android/app/src/main/AndroidManifest.xml "$BK/AndroidManifest.xml"
           flutter create --platforms=android --project-name yuedu \
-            --org com.yanxia.reader --no-pub "$TMP/skeleton" > /dev/null
-          mkdir -p android/gradle/wrapper
-          cp -f "$TMP/skeleton/android/gradlew" android/gradlew
-          cp -f "$TMP/skeleton/android/gradlew.bat" android/gradlew.bat
-          cp -f "$TMP/skeleton/android/gradle/wrapper/gradle-wrapper.jar" \
-                android/gradle/wrapper/gradle-wrapper.jar
-          cp -f "$TMP/skeleton/android/settings.gradle.kts" \
-                android/settings.gradle.kts
+            --org com.yanxia.reader --no-pub .
+          cp "$BK/app.gradle" android/app/build.gradle
+          cp "$BK/build.gradle" android/build.gradle
+          cp "$BK/AndroidManifest.xml" android/app/src/main/AndroidManifest.xml
           chmod +x android/gradlew
-          rm -rf "$TMP"
-          ls -l android/gradlew android/gradle/wrapper/gradle-wrapper.jar
+          rm -rf "$BK"
+          echo "--- 生成结果 ---"
+          ls -l android/gradlew android/gradle/wrapper/gradle-wrapper.jar \
+                android/settings.gradle android/app/build.gradle
+          echo "--- 不应存在 .kts ---"
+          find android -name '*.kts' -print
 
       - name: 拉依赖
         run: flutter pub get
