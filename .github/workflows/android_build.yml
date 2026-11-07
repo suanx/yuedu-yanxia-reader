@@ -111,8 +111,12 @@ jobs:
           cat /tmp/build.log
           echo "::endgroup::"
           if [ "$B" -ne 0 ]; then
-            tail -60 /tmp/build.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
-              | while IFS= read -r l; do echo "::error::BUILD $l"; done
+            echo "::error::BUILD_EXIT=$B"
+            grep -E "FAILURE:|What went wrong|error:|Error:|Could not|Unsupported|AAPT|Execution failed|FAILED|v1 embedding" /tmp/build.log \
+              | head -8 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
+              | while IFS= read -r l; do echo "::error::$l"; done
+            tail -3 /tmp/build.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
+              | while IFS= read -r l; do echo "::error::END $l"; done
             exit 1
           fi
 

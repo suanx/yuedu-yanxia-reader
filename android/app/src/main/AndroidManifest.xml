@@ -27,6 +27,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Flutter 3.24 靠这个标记判断是否 v2 embedding，
+             缺失会被判定为已删除的 v1 embedding 并直接终止构建。 -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
         <!--
             启动闪屏：Flutter 首帧就绪后自动移除 LaunchTheme 的 windowBackground。
             这里再显式声明一次，确保 12+ 设备上也不会回退成白色系统闪屏。
