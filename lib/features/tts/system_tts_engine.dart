@@ -165,7 +165,8 @@ final class SystemTtsEngine implements TtsEngine {
     _finishCurrentSentence();
     try {
       await _channel.invokeMethod<void>('shutdown');
-      await _channel.setMethodCallHandler(null);
+      // setMethodCallHandler 返回 void，不能 await
+      _channel.setMethodCallHandler(null);
     } catch (_) {}
     await _stateCtrl.close();
     await _utteranceCtrl.close();
