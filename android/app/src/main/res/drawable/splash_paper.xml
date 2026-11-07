@@ -21,7 +21,7 @@
     <!-- 顶部淡入光晕 -->
     <item
         android:gravity="top|center_horizontal"
-        android:top="0">
+        android:top="0dp">
         <shape android:shape="rectangle">
             <gradient
                 android:type="radial"
