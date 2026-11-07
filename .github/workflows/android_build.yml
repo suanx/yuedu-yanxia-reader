@@ -112,11 +112,14 @@ jobs:
           echo "::endgroup::"
           if [ "$B" -ne 0 ]; then
             echo "::error::BUILD_EXIT=$B"
-            grep -E "FAILURE:|What went wrong|error:|Error:|Could not|Unsupported|AAPT|Execution failed|FAILED|v1 embedding" /tmp/build.log \
-              | head -8 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
-              | while IFS= read -r l; do echo "::error::$l"; done
-            tail -3 /tmp/build.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
-              | while IFS= read -r l; do echo "::error::END $l"; done
+            CTX=$(awk '/\* What went wrong:/{f=1} f && !/^\* Try:/{print} /^\* Try:/{exit}' /tmp/build.log \
+              | head -32 | tr '\n' '¦' | sed -e 's/%/%25/g' -e 's/\r/%0D/g')
+            echo "::error::CTX $CTX"
+            KL=$(grep -E "^e: |Module was compiled|Unresolved reference|incompatible|Kotlin version|Compilation error|Could not resolve" /tmp/build.log \
+              | head -12 | tr '\n' '¦' | sed -e 's/%/%25/g' -e 's/\r/%0D/g')
+            echo "::error::KOTLIN $KL"
+            END=$(tail -2 /tmp/build.log | tr '\n' '¦' | sed -e 's/%/%25/g' -e 's/\r/%0D/g')
+            echo "::error::END $END"
             exit 1
           fi
 
