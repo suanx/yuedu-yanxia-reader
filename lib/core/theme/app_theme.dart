@@ -52,7 +52,7 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: sectionTitle),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: cardBg,
         elevation: 0,
         margin: EdgeInsets.zero,
