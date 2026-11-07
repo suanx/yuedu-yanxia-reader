@@ -36,14 +36,16 @@ enum PaperTone {
   paper(0xFFF4EFE1, 0xFFEDE4CE, 0xFF3F3A30),
   night(0xFF1C1B22, 0xFF14131A, 0xFFC8C2B4);
 
-  const PaperTone(this.paper, this.edge, this.ink);
-  final int paper;
-  final int edge;
-  final int ink;
+  // 字段名不能与枚举常量 `paper` 同名，否则 this.paper 会被解析成
+  // 那个 PaperTone 常量，构造函数参数类型变成 PaperTone 而非 int。
+  const PaperTone(this.paperArgb, this.edgeArgb, this.inkArgb);
+  final int paperArgb;
+  final int edgeArgb;
+  final int inkArgb;
 
-  Color get paperColor => Color(paper);
-  Color get edgeColor => Color(edge);
-  Color get inkColor => Color(ink);
+  Color get paperColor => Color(paperArgb);
+  Color get edgeColor => Color(edgeArgb);
+  Color get inkColor => Color(inkArgb);
 }
 
 final readingPrefsProvider =

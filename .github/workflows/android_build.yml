@@ -97,10 +97,21 @@ jobs:
           test -f pubspec.yaml && echo "pubspec.yaml OK"
           test -f lib/main.dart && echo "lib/main.dart OK"
           grep -q "flutter_tts" pubspec.yaml && echo "flutter_tts OK"
-          grep -q "com.yanxia.reader" android/app/build.gradle.kts && echo "applicationId OK"
+          grep -q "com.yanxia.reader" android/app/build.gradle && echo "applicationId OK"
 
       - name: 构建 APK（release，带 debug 签名，可直接安装）
-        run: flutter build apk --release
+        run: |
+          set +e
+          flutter build apk --release > /tmp/build.log 2>&1
+          B=$?
+          echo "::group::flutter build 输出"
+          cat /tmp/build.log
+          echo "::endgroup::"
+          if [ "$B" -ne 0 ]; then
+            tail -60 /tmp/build.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
+              | while IFS= read -r l; do echo "::error::BUILD $l"; done
+            exit 1
+          fi
 
       - name: 构建 AAB（手动选 aab 时）
         if: github.event_name == 'workflow_dispatch' && inputs.target == 'aab'
