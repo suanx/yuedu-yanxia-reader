@@ -48,11 +48,13 @@ jobs:
           cp android/app/build.gradle "$BK/app.gradle"
           cp android/build.gradle "$BK/build.gradle"
           cp android/app/src/main/AndroidManifest.xml "$BK/AndroidManifest.xml"
+          cp android/app/src/main/java/com/yanxia/reader/MainActivity.kt "$BK/MainActivity.kt"
           flutter create --platforms=android --project-name yuedu \
             --org com.yanxia.reader --no-pub .
           cp "$BK/app.gradle" android/app/build.gradle
           cp "$BK/build.gradle" android/build.gradle
           cp "$BK/AndroidManifest.xml" android/app/src/main/AndroidManifest.xml
+          cp "$BK/MainActivity.kt" android/app/src/main/java/com/yanxia/reader/MainActivity.kt
           chmod +x android/gradlew
           rm -rf "$BK"
           echo "--- 生成结果 ---"
@@ -99,7 +101,8 @@ jobs:
         run: |
           test -f pubspec.yaml && echo "pubspec.yaml OK"
           test -f lib/main.dart && echo "lib/main.dart OK"
-          grep -q "flutter_tts" pubspec.yaml && echo "flutter_tts OK"
+          grep -q "yanxia/tts" lib/features/tts/system_tts_engine.dart && echo "TTS 通道 OK"
+          grep -q "TextToSpeech" android/app/src/main/java/com/yanxia/reader/MainActivity.kt && echo "原生 TTS OK"
           grep -q "com.yanxia.reader" android/app/build.gradle && echo "applicationId OK"
 
       - name: 构建 APK（release，带 debug 签名，可直接安装）

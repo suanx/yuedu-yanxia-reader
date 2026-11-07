@@ -12,7 +12,9 @@ dependencies:
     sdk: flutter
   go_router: ^14.2.0
   flutter_riverpod: ^2.5.1
-  flutter_tts: ^4.2.0
+  # 听书走自写的 Android 原生 TextToSpeech 通道（MethodChannel），
+  # 不依赖 flutter_tts 插件：避免其 Kotlin 2.x stdlib 与 Flutter 3.24
+  # 的 Kotlin 编译器版本冲突导致 Gradle 编译失败。
 
 dev_dependencies:
   flutter_test:
