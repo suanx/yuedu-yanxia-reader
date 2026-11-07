@@ -1,0 +1,3 @@
+# 封面占位目录
+# 放 9 张 3:4 的封面图（如 cover_01.png … cover_09.png），
+# Book.coverAsset 对应引用。空跑时用渐变色块代替，不报错。
