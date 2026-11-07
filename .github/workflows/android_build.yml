@@ -1,64 +1,107 @@
 name: Android 构建
+
 on:
   push:
     branches: [main]
-    paths-ignore: ['.github/workflows/**','README.md']
+    paths-ignore: ['.github/workflows/**', 'README.md']
   pull_request:
     branches: [main]
   workflow_dispatch:
     inputs:
       target:
-        description: 'apk 或 aab'
+        description: '产物类型'
         required: true
         default: 'apk'
         type: choice
         options: [apk, aab]
+
 permissions:
   contents: read
   packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - name: 密钥完整性闸门（缺 keystore 只出未签名包，绝不假签）
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 密钥完整性闸门
         run: |
+          echo "::group::检查签名密钥"
           MISS=0
           for k in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
-            [[ -n "${!k:-}" ]] || { echo "::error::$k 未配置"; MISS=1; }
+            if [ -z "${!k:-}" ]; then
+              echo "::warning::$k 未配置，本次出【未签名】APK，需在手机用 debug 方式安装"
+              MISS=1
+            fi
           done
-          echo "HAS_SIGN=$((1-MISS))" >> "$GITHUB_ENV"
+          echo "::endgroup::"
+          echo "HAS_SIGN=$((1 - MISS))" >> "$GITHUB_ENV"
+
       - name: 工程结构校验
         run: |
-          test -f pubspec.yaml && echo "✓ pubspec"
-          test -f lib/main.dart && echo "✓ main.dart"
-          grep -q flutter_tts pubspec.yaml && echo "✓ flutter_tts"
-      - uses: subosito/flutter-action@v2
-        with: {flutter-version: '3.24.5', channel: stable, cache: true}
-      - run: flutter pub get
-      - name: 静态检查（格式/分析/单测）
+          test -f pubspec.yaml && echo "✓ pubspec.yaml"
+          test -f lib/main.dart && echo "✓ lib/main.dart"
+          grep -q "flutter_tts" pubspec.yaml && echo "✓ flutter_tts 已声明"
+          grep -q "com.yanxia.reader" android/app/build.gradle.kts && echo "✓ applicationId 一致" || echo "⚠ applicationId 需核对"
+
+      - name: 安装 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: stable
+          cache: true
+
+      - name: 拉依赖
+        run: flutter pub get
+
+      - name: 静态检查（格式 / 分析 / 单测）
         run: |
-          dart format --set-exit-if-changed . || (echo "::error::请先 dart format ."; exit 1)
+          dart format --set-exit-if-changed . || (echo "::error::代码格式不统一，请先 dart format ."; exit 1)
           flutter analyze --no-fatal-infos
-          flutter test --no-pub || echo "::warning::无单测，跳过"
-      - run: flutter build apk --release --no-shrink
-      - name: 签名（仅 secret 齐全）
+          flutter test --no-pub || echo "::warning::暂无单测，跳过"
+
+      - name: 构建 APK（release，未压缩混淆以便排错）
+        run: flutter build apk --release --no-shrink
+
+      - name: 重命名未签名包
+        run: cp build/app/outputs/flutter-apk/app-release.apk "$GITHUB_WORKSPACE/yuedu-yanxia.apk"
+
+      - name: 签名 APK（仅当 4 个 secret 都配齐）
         if: env.HAS_SIGN == '1'
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/k.keystore"
-          BT=$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools|sort -V|tail -1)
-          "$BT/apksigner" sign --ks "$RUNNER_TEMP/k.keystore" --ks-pass "pass:$KEYSTORE_PASSWORD" \
-            --key-pass "pass:$KEY_PASSWORD" --ks-key-alias "$KEY_ALIAS" \
-            --out "$GITHUB_WORKSPACE/app-signed.apk" build/app/outputs/flutter-apk/app-release.apk
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$BT/apksigner" sign \
+            --ks "$RUNNER_TEMP/upload.keystore" \
+            --ks-pass "pass:$KEYSTORE_PASSWORD" \
+            --key-pass "pass:$KEY_PASSWORD" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --out "$GITHUB_WORKSPACE/yuedu-yanxia-signed.apk" \
+            "$GITHUB_WORKSPACE/yuedu-yanxia.apk"
           echo "SIGNED=true" >> "$GITHUB_ENV"
-      - run: cp build/app/outputs/flutter-apk/app-release.apk "$GITHUB_WORKSPACE/yuedu-unsigned.apk"
-      - uses: actions/upload-artifact@v4
+
+      - name: 构建 AAB（手动选 aab 时）
+        if: github.event_name == 'workflow_dispatch' && inputs.target == 'aab'
+        run: flutter build appbundle --release
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
         with:
-          name: yuedu-yanxia-${{ github.sha::7 }}
-          path: ${{ env.SIGNED == 'true' && 'app-signed.apk' || 'yuedu-unsigned.apk' }}
+          name: yuedu-yanxia
+          path: |
+            ${{ env.SIGNED == 'true' && 'yuedu-yanxia-signed.apk' || 'yuedu-yanxia.apk' }}
+          if-no-files-found: error
           retention-days: 30
-      - run: |
+
+      - name: 构建小结
+        run: |
           echo "## 📦 檐下 · Yanxia Reader" >> "$GITHUB_STEP_SUMMARY"
-          echo "- commit \`${{ github.sha::7 }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 签名：**${{ env.SIGNED == 'true' && '✅ 已签名，可直装' || '⚠️ 未签名（未配 keystore），用 debug 版或本地 apksigner）' }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 分支：\`main\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 签名：**${{ env.SIGNED == 'true' && '✅ 已签名，可直接安装' || '⚠️ 未签名（仓库未配 keystore），见下方安装方式' }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 下载：本次运行页面的 **Artifacts → yuedu-yanxia**" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ env.SIGNED }}" != "true" ]; then
+            echo "- 未签名包安装：手机开启「开发者选项→USB调试/安装未知应用」，用 \`adb install yuedu-yanxia.apk\`，或在手机文件管理器里点开并允许安装。" >> "$GITHUB_STEP_SUMMARY"
+          fi
