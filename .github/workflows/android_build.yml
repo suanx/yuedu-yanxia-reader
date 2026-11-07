@@ -69,8 +69,28 @@ jobs:
 
       - name: 静态分析与单测
         run: |
-          flutter analyze --no-fatal-infos --no-fatal-warnings
-          flutter test --no-pub
+          set +e
+          flutter analyze --no-fatal-infos --no-fatal-warnings > /tmp/analyze.log 2>&1
+          A=$?
+          flutter test --no-pub > /tmp/test.log 2>&1
+          T=$?
+          echo "analyze exit=$A  test exit=$T"
+          echo "::group::flutter analyze 输出"
+          cat /tmp/analyze.log
+          echo "::endgroup::"
+          echo "::group::flutter test 输出"
+          cat /tmp/test.log
+          echo "::endgroup::"
+          # 日志下载受网络限制，把关键输出同步成 annotations 便于远程排错
+          if [ "$A" -ne 0 ]; then
+            tail -45 /tmp/analyze.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
+              | while IFS= read -r l; do echo "::error::ANALYZE $l"; done
+          fi
+          if [ "$T" -ne 0 ]; then
+            tail -25 /tmp/test.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
+              | while IFS= read -r l; do echo "::error::TEST $l"; done
+          fi
+          if [ "$A" -ne 0 ] || [ "$T" -ne 0 ]; then exit 1; fi
 
       - name: 工程结构校验
         run: |
