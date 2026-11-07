@@ -1,0 +1,3 @@
+# 占位文件
+# 正式版把阅读衬线体（如 Source Han Serif / Noto Serif SC）的 .ttf 放到此目录，
+# 并在 pubspec.yaml 的 fonts 段取消注释即可生效。

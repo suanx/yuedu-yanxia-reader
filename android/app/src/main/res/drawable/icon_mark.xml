@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    檐下 · 图标前景字标（纯矢量）
+    自适应图标的安全区是中心 72dp（108 画布内），这里只画一个
+    抽象「檐」：一根横檐 + 下方一点落墨，远看是「一横一点」的记忆点。
+    注意：android:fillColor 是 <path> 的属性，不能写在 <group> 上，
+    否则 aapt2 会拒绝打包。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group>
+        <!-- 檐：居中横笔 -->
+        <path
+            android:fillColor="#5A4A2E"
+            android:pathData="M30,50 h48 v4 h-48 z" />
+        <!-- 落墨点：横笔右下一滴 -->
+        <path
+            android:fillColor="#5A4A2E"
+            android:pathData="M66,62 a3.4,3.4 0 1,1 0,0.01 z" />
+        <!-- 左下一短竖，平衡构图 -->
+        <path
+            android:fillColor="#5A4A2E"
+            android:pathData="M36,58 h3.2 v12 h-3.2 z" />
+    </group>
+
+</vector>

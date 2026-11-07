@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    檐下 · 品牌字标（纯矢量）
+    因为启动期系统还没加载 Flutter 的自定义字体，这里用一个居中圆点 + 两行文字
+    的「伪字标」兜底：圆点=檐，短横=檐下之线。视觉上是克制的品牌印记，
+    不依赖任何 ttf，也永远不会缺字形。
+    若后续要换成真书法字，把下面 vector 的 pathData 换成字体转的轮廓即可。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="180dp"
+    android:height="120dp"
+    android:viewportWidth="180"
+    android:viewportHeight="120">
+
+    <!-- 檐：上方一枚温润的圆点 -->
+    <path
+        android:fillColor="#5A4A2E"
+        android:pathData="M86,30 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+
+    <!-- 檐下之线：短横，像屋檐投下的影子 -->
+    <path
+        android:fillColor="#C9B58A"
+        android:pathData="M70,46 h40 v2.4 h-40 z" />
+
+    <!-- 拼音行 YANXIA，用系统字体无法保证，故用细横段阵列模拟字母轮廓 -->
+    <group android:fillColor="#8A7854">
+        <!-- Y -->
+        <path android:pathData="M52,62 l4,-8 h3 l4,8 h-3 l-1.2,-2.6 h-2.6 l-1.2,2.6 z" />
+        <path android:pathData="M57.5,62 v9 h-2.6 v-9 z" />
+        <!-- A -->
+        <path android:pathData="M66,71 h-2.6 l3.4,-9 h3 l3.4,9 h-2.6 l-0.7,-2 h-3.2 z m1.6,-4.4 l-0.4,1.2 h2 l-0.4,-1.2 z" />
+        <!-- N -->
+        <path android:pathData="M78,62 v9 h-2.4 v-6.6 l3.2,6.6 h1.6 l3.2,-6.6 v6.6 h-2.4 v-9 z" />
+        <!-- X -->
+        <path android:pathData="M92,62 l1.6,3.4 1.6,-3.4 h2.6 l-2.4,4.6 2.4,4.4 h-2.6 l-1.6,-3.2 -1.6,3.2 h-2.6 l2.4,-4.4 -2.4,-4.6 z" />
+        <!-- I -->
+        <path android:pathData="M103,62 h2.4 v9 h-2.4 z" />
+        <!-- A -->
+        <path android:pathData="M112,71 h-2.6 l3.4,-9 h3 l3.4,9 h-2.6 l-0.7,-2 h-3.2 z m1.6,-4.4 l-0.4,1.2 h2 l-0.4,-1.2 z" />
+    </group>
+
+    <!-- 底部细线 + 一句副标 -->
+    <path
+        android:fillColor="#C9B58A"
+        android:pathData="M56,88 h68 v1 h-68 z" />
+</vector>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    檐下 · 启动闪屏图层
+    暖黄纸张渐变 + 居中品牌字标。纯 drawable，不依赖任何字体/图片资源，
+    所以在 Flutter 首帧到来之前就能稳住纸面底色，杜绝白闪。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 纸面底色：上浅下略深，模拟纸页自然暗角 -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="270"
+                android:startColor="#F9F1D6"
+                android:centerColor="#F7ECCB"
+                android:endColor="#F2E3BE" />
+        </shape>
+    </item>
+
+    <!-- 顶部淡入光晕 -->
+    <item
+        android:gravity="top|center_horizontal"
+        android:top="0">
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="420dp"
+                android:startColor="#FFFFFF"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- 品牌字标：居中，两行「檐下 · YANXIA」
+         splash_mark 是 vector drawable，不能用 <bitmap> 承载，
+         直接作为 layer-list 的 item drawable 引用即可。 -->
+    <item
+        android:gravity="center"
+        android:drawable="@drawable/splash_mark" />
+
+</layer-list>

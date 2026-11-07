@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        启动闪屏：暖黄纸面，对齐阅读页纸张 (#F7ECCB)。
+        用系统内置 Material 主题，不依赖 com.google.android.material 库，
+        避免在 CI 上因缺少 Material Components 依赖导致资源合并失败。
+    -->
+    <style name="LaunchTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_paper</item>
+        <item name="android:statusBarColor">#F7ECCB</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="NormalTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#F5F6FA</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
+</resources>

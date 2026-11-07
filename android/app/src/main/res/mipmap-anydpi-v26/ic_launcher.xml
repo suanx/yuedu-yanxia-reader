@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    檐下 · 自适应图标（Android 8+）
+    背景 = 暖黄纸面，前景 = 深墨「檐」字标。
+    系统会按形状（圆/方/圆角矩形/水滴）自动裁切前景的安全区，
+    所以字标被包在 72dp 的安全框里，任何机型都不会被切到笔画。
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/icon_paper" />
+    <foreground android:drawable="@drawable/icon_mark" />
+    <monochrome android:drawable="@drawable/icon_mark" />
+</adaptive-icon>

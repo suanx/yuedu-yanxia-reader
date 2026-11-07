@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yuedu/core/constants/app_constants.dart';
 import 'package:yuedu/core/theme/app_theme.dart';
 import 'package:yuedu/data/models/book.dart';
 import 'package:yuedu/data/repositories/reading_state.dart';
-import 'package:yuedu/features/reading/reading_page.dart';
 import 'package:yuedu/widgets/book_cover.dart';
 
 /// 书架网格单元：封面 + 书名 + 作者 + 进度条 + 「68% · 142/208」。
 ///
-/// 点封面 → [ReadingPage]，并把 [bookId] 带过去，阅读页翻页时会把进度回写到
+/// 点封面 → 阅读页，并把 bookId 带过去，阅读页翻页时会把进度回写到
 /// [bookshelfProgressProvider]，所以书架上的百分比和页码会实时跟着走。
 class BookshelfTile extends ConsumerWidget {
   const BookshelfTile({super.key, required this.book});
