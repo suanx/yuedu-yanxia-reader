@@ -510,7 +510,7 @@ class _ReadingAppBar extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: tone.inkColor.withOpacity(0.7),
-                fontSize: 14,
+                fontSize: 13.5,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.6,
               ),
@@ -526,7 +526,7 @@ class _ReadingAppBar extends ConsumerWidget {
               mode == ReadingMode.vertical
                   ? Icons.format_align_left_rounded
                   : Icons.format_align_right_rounded,
-              size: 19,
+              size: 18,
               color: iconColor,
             ),
           ),
@@ -538,7 +538,7 @@ class _ReadingAppBar extends ConsumerWidget {
               'A',
               style: TextStyle(
                 color: iconColor,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -546,7 +546,7 @@ class _ReadingAppBar extends ConsumerWidget {
           ),
           // 纸张主题
           PopupMenuButton<PaperTone>(
-            icon: Icon(Icons.palette_outlined, size: 19, color: iconColor),
+            icon: Icon(Icons.palette_outlined, size: 18, color: iconColor),
             color: Colors.white,
             onSelected: (t) =>
                 ref.read(readingPrefsProvider.notifier).setPaper(t),

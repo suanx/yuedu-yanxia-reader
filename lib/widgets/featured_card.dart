@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yuedu/core/constants/app_constants.dart';
 import 'package:yuedu/core/theme/app_theme.dart';
 import 'package:yuedu/data/models/book.dart';
-import 'package:go_router/go_router.dart';
 import 'package:yuedu/widgets/book_cover.dart';
+import 'package:yuedu/widgets/glass.dart';
 
-/// 「每日推荐」横向大卡：左文右封面，卡片白底 + 淡蓝光晕
+/// 「每日推荐」横向大卡：左文右封面，玻璃底 + 淡蓝光晕。
+///
+/// 卡片内不再重复写一遍「每日推荐」（分区标题已经写过），
+/// 只保留书名 / 作者 / 开始阅读，减少视觉噪音。
 class FeaturedCard extends StatelessWidget {
   const FeaturedCard({super.key, required this.book, this.onTap});
 
@@ -15,20 +20,11 @@ class FeaturedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap ?? () => context.push('/read/${book.id}'),
-      child: Container(
-        width: 268,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.cardBg,
-          borderRadius: AppTheme.radius18,
-          boxShadow: AppTheme.cardElevation(context),
-          // 右下角一点冷蓝晕，对齐设计稿的轻盈感
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.white, Color(0xFFF4F8FF)],
-          ),
-        ),
+      child: GlassCard(
+        width: 262,
+        padding: const EdgeInsets.all(AppConstants.s16),
+        radius: 20,
+        opacity: 0.66,
         child: Row(
           children: [
             Expanded(
@@ -37,63 +33,38 @@ class FeaturedCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '每日推荐',
-                    style: TextStyle(
-                      color: AppTheme.sectionTitle,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
                     book.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      height: 1.35,
-                    ),
+                    style: AppText.title.copyWith(fontSize: 15),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    book.author,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppConstants.s6),
+                  Text(book.author, style: AppText.caption),
+                  const SizedBox(height: AppConstants.s16),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
-                      color: AppTheme.brandSoft,
+                      color: AppTheme.brandSoft.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.play_arrow_rounded,
-                            size: 15, color: AppTheme.brand),
+                            size: 14, color: AppTheme.brand),
                         const SizedBox(width: 3),
-                        Text(
-                          '开始阅读',
-                          style: TextStyle(
-                            color: AppTheme.brand,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        Text('开始阅读', style: AppText.action),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 14),
-            BookCover(book: book, width: 84),
+            const SizedBox(width: AppConstants.s12),
+            BookCover(book: book, width: 80),
           ],
         ),
       ),

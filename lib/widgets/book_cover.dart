@@ -64,9 +64,9 @@ class BookCover extends StatelessWidget {
                   ),
                   child: Text(
                     book.tag!,
-                    style: const TextStyle(
+                    style: AppText.micro.copyWith(
                       color: AppTheme.brand,
-                      fontSize: 9.5,
+                      fontSize: 9,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -102,7 +102,7 @@ class BookCover extends StatelessWidget {
           child: Icon(
             Icons.auto_stories_rounded,
             color: Colors.white.withOpacity(0.85),
-            size: 30,
+            size: 26,
           ),
         ),
       );

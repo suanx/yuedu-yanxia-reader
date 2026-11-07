@@ -1,68 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yuedu/core/constants/app_constants.dart';
 import 'package:yuedu/core/theme/app_theme.dart';
+import 'package:yuedu/data/models/book.dart';
 import 'package:yuedu/data/repositories/mock_library.dart';
 import 'package:yuedu/widgets/book_cover.dart';
-import 'package:go_router/go_router.dart';
 import 'package:yuedu/widgets/featured_card.dart';
+import 'package:yuedu/widgets/glass.dart';
 
-/// 发现页：顶部「发现」标题 + 搜索框 + 每日推荐横滑 + 新书速递横滑
+/// 发现页：居中标题 + 玻璃搜索框 + 每日推荐横滑 + 新书速递横滑
+///
+/// 旧版在「新书速递」下面又重复摆了一排同样的三张卡，是页面显得杂的主因，
+/// 这里整块删掉；所有间距只走 [AppConstants] 的刻度，字号只走 [AppText]。
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const hPad = AppConstants.pagePadding;
+
     return Scaffold(
-      backgroundColor: AppTheme.pageBg,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // 标题
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 18, bottom: 14),
-                child: Center(
-                  child: Text(
-                    '发现',
-                    style: TextStyle(
-                      color: AppTheme.sectionTitle,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.4,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            const SliverToBoxAdapter(child: GlassHeader(title: '发现')),
 
-            // 搜索框
+            // 搜索框：半透明玻璃 + 高斯模糊
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height: 46,
+                padding: const EdgeInsets.symmetric(horizontal: hPad),
+                child: GlassCard(
+                  height: 44,
+                  radius: 15,
+                  opacity: 0.60,
+                  blur: 14,
                   padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: AppTheme.cardElevation(context),
-                  ),
                   child: Row(
                     children: [
                       Icon(Icons.search_rounded,
-                          size: 20, color: AppTheme.textSecondary),
-                      const SizedBox(width: 9),
+                          size: 19, color: AppTheme.textSecondary),
+                      const SizedBox(width: AppConstants.s8),
                       Expanded(
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: '搜索书籍',
-                            hintStyle: TextStyle(
+                            hintStyle: AppText.body.copyWith(
                               color: AppTheme.textSecondary,
-                              fontSize: 14.5,
                             ),
                             border: InputBorder.none,
                             isDense: true,
+                            contentPadding: EdgeInsets.zero,
                           ),
-                          style: const TextStyle(fontSize: 14.5),
+                          style: AppText.body,
                           onSubmitted: (_) {},
                         ),
                       ),
@@ -72,154 +62,99 @@ class DiscoverPage extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 22)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppConstants.s24)),
 
-            // 每日推荐
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.only(left: 20),
+                padding: const EdgeInsets.symmetric(horizontal: hPad),
                 child: _SectionHeader(
                   title: '每日推荐',
                   subtitle: '为你挑的今日好书',
-                  trailing: TextButton(
-                    onPressed: () {},
-                    child: const Text('换一批',
-                        style: TextStyle(fontSize: 12.5)),
-                  ),
+                  action: '换一批',
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppConstants.s12)),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 172,
+                height: 158,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: hPad),
                   itemCount: dailyPicks.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 14),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AppConstants.s12),
                   itemBuilder: (_, i) => FeaturedCard(book: dailyPicks[i]),
                 ),
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 26)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppConstants.s28)),
 
-            // 新书速递
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: hPad),
                 child: _SectionHeader(
                   title: '新书速递',
                   subtitle: '新书推荐',
-                  trailing: TextButton(
-                    onPressed: () {},
-                    child: const Text('查看全部',
-                        style: TextStyle(fontSize: 12.5)),
-                  ),
+                  action: '查看全部',
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppConstants.s12)),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 150,
+                height: 166,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: hPad),
                   itemCount: newArrivals.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 14),
-                  itemBuilder: (_, i) => GestureDetector(
-                    onTap: () => context.push('/read/${newArrivals[i].id}'),
-                    child: SizedBox(
-                      width: 96,
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BookCover(book: newArrivals[i], showTag: false),
-                        const SizedBox(height: 8),
-                        Text(
-                          newArrivals[i].title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          newArrivals[i].author,
-                          maxLines: 1,
-                          style: const TextStyle(
-                            fontSize: 10.5,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            ),
-
-            // 三张精选封面卡：对齐截图里「新书速递」下方那排静态卡
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    for (final b in newArrivals.take(3))
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: GestureDetector(
-                            onTap: () => context.push('/read/${b.id}'),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: AppTheme.radius14,
-                                boxShadow: AppTheme.cardElevation(context),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  BookCover(book: b, showTag: false),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    b.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    b.author,
-                                    maxLines: 1,
-                                    style: const TextStyle(
-                                      fontSize: 9.5,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AppConstants.s12),
+                  itemBuilder: (_, i) => _NewArrivalCard(book: newArrivals[i]),
                 ),
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            // 底栏是浮层，给内容留出滚动余量
+            const SliverToBoxAdapter(
+                child: SizedBox(height: AppConstants.bottomSafe)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NewArrivalCard extends StatelessWidget {
+  const _NewArrivalCard({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/read/${book.id}'),
+      child: SizedBox(
+        width: 92,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BookCover(book: book, showTag: false),
+            const SizedBox(height: AppConstants.s8),
+            Text(
+              book.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.title,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              book.author,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.micro,
+            ),
           ],
         ),
       ),
@@ -228,42 +163,38 @@ class DiscoverPage extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.subtitle, this.trailing});
+  const _SectionHeader({
+    required this.title,
+    required this.subtitle,
+    required this.action,
+  });
 
   final String title;
   final String subtitle;
-  final Widget? trailing;
+  final String action;
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppTheme.sectionTitle,
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 11.5,
-              ),
-            ),
+            Text(title, style: AppText.section),
+            const SizedBox(height: 3),
+            Text(subtitle, style: AppText.caption),
           ],
         ),
         const Spacer(),
-        if (trailing != null) trailing!,
+        GestureDetector(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 1),
+            child: Text(action, style: AppText.action),
+          ),
+        ),
       ],
     );
   }
-
 }

@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yuedu/core/constants/app_constants.dart';
 import 'package:yuedu/core/theme/app_theme.dart';
 import 'package:yuedu/data/repositories/mock_library.dart';
 import 'package:yuedu/data/repositories/reading_state.dart';
 import 'package:yuedu/widgets/bookshelf_tile.dart';
+import 'package:yuedu/widgets/glass.dart';
 
-/// 书架页：3 列网格 + 右上「编辑」切换多选 + 编辑态底部删除/置顶栏
+/// 书架页：3 列网格 + 右上「编辑」多选 + 编辑态玻璃操作浮层
+///
+/// 三处修正：
+///   · 去掉嵌套 AppBar，标题条与另外三页统一
+///   · childAspectRatio 0.62 → 0.48，配合自适应封面，彻底解决裁切/重叠
+///   · 编辑操作栏从 Scaffold.bottomNavigationBar 改成浮层，避免双底栏打架
 class BookshelfPage extends ConsumerWidget {
   const BookshelfPage({super.key});
 
@@ -13,109 +20,111 @@ class BookshelfPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final editing = ref.watch(bookshelfEditModeProvider);
     final selected = ref.watch(bookshelfSelectionProvider);
+    const hPad = AppConstants.pagePadding;
 
     return Scaffold(
-      backgroundColor: AppTheme.pageBg,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        // 截图里书架页顶部只有右对齐「编辑」，底部 tab 已显示「书架」，故不重复标题
-        title: editing ? Text('已选 ${selected.length}') : null,
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: GestureDetector(
-              onTap: () {
-                if (editing && selected.isEmpty) {
-                  ref.read(bookshelfEditModeProvider.notifier).state = false;
-                } else {
-                  ref.read(bookshelfEditModeProvider.notifier).state = !editing;
-                  if (editing) {
-                    ref.read(bookshelfSelectionProvider.notifier).state = {};
-                  }
-                }
-              },
-              child: Text(
-                editing ? '完成' : '编辑',
-                style: TextStyle(
-                  color: AppTheme.sectionTitle,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: GridView.builder(
-            padding: const EdgeInsets.only(top: 8, bottom: 96),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 18,
-              crossAxisSpacing: 14,
-              childAspectRatio: 0.62,
-            ),
-            itemCount: bookshelf.length,
-            itemBuilder: (_, i) => BookshelfTile(book: bookshelf[i]),
-          ),
-        ),
-      ),
-      bottomNavigationBar: editing && selected.isNotEmpty
-          ? SafeArea(
-              child: Container(
-                height: 64,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 12,
-                      offset: const Offset(0, -3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    _ActionBtn(
-                      icon: Icons.push_pin_outlined,
-                      label: '置顶',
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: hPad),
+              child: Column(
+                children: [
+                  GlassHeader(
+                    title: editing ? '已选 ${selected.length}' : '书架',
+                    trailing: GestureDetector(
                       onTap: () {
-                                                ref.read(bookshelfSelectionProvider.notifier).state = {};
-                        ref.read(bookshelfEditModeProvider.notifier).state = false;
+                        if (editing && selected.isEmpty) {
+                          ref.read(bookshelfEditModeProvider.notifier).state =
+                              false;
+                        } else {
+                          ref.read(bookshelfEditModeProvider.notifier).state =
+                              !editing;
+                          if (editing) {
+                            ref
+                                .read(bookshelfSelectionProvider.notifier)
+                                .state = {};
+                          }
+                        }
                       },
-                    ),
-                    _ActionBtn(
-                      icon: Icons.delete_outline_rounded,
-                      label: '删除',
-                      isDanger: true,
-                      onTap: () {
-                                                ref.read(bookshelfSelectionProvider.notifier).state = {};
-                        ref.read(bookshelfEditModeProvider.notifier).state = false;
-                      },
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${selected.length} 本已选',
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12.5,
+                      child: Text(
+                        editing ? '完成' : '编辑',
+                        style: AppText.action,
                       ),
                     ),
-                  ],
+                  ),
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.only(
+                        top: AppConstants.s4,
+                        bottom: AppConstants.bottomSafe,
+                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: AppConstants.s20,
+                        crossAxisSpacing: AppConstants.gridGap,
+                        childAspectRatio: 0.48,
+                      ),
+                      itemCount: bookshelf.length,
+                      itemBuilder: (_, i) => BookshelfTile(book: bookshelf[i]),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (editing && selected.isNotEmpty)
+              Positioned(
+                left: hPad,
+                right: hPad,
+                bottom: 84,
+                child: GlassCard(
+                  radius: 18,
+                  opacity: 0.76,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.s16,
+                    vertical: AppConstants.s8,
+                  ),
+                  child: Row(
+                    children: [
+                      _ActionBtn(
+                        icon: Icons.push_pin_outlined,
+                        label: '置顶',
+                        onTap: () => _reset(ref),
+                      ),
+                      _ActionBtn(
+                        icon: Icons.delete_outline_rounded,
+                        label: '删除',
+                        isDanger: true,
+                        onTap: () => _reset(ref),
+                      ),
+                      const Spacer(),
+                      Text('${selected.length} 本已选',
+                          style: AppText.caption),
+                    ],
+                  ),
                 ),
               ),
-            )
-          : null,
+          ],
+        ),
+      ),
     );
+  }
+
+  void _reset(WidgetRef ref) {
+    ref.read(bookshelfSelectionProvider.notifier).state = {};
+    ref.read(bookshelfEditModeProvider.notifier).state = false;
   }
 }
 
 class _ActionBtn extends StatelessWidget {
-  const _ActionBtn({required this.icon, required this.label, this.isDanger = false, this.onTap});
+  const _ActionBtn({
+    required this.icon,
+    required this.label,
+    this.isDanger = false,
+    this.onTap,
+  });
 
   final IconData icon;
   final String label;
@@ -126,15 +135,15 @@ class _ActionBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isDanger ? const Color(0xFFE8798C) : AppTheme.brand;
     return Padding(
-      padding: const EdgeInsets.only(right: 22),
+      padding: const EdgeInsets.only(right: AppConstants.s20),
       child: GestureDetector(
         onTap: onTap,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 21, color: color),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 11.5, color: color)),
+            Icon(icon, size: 20, color: color),
+            const SizedBox(height: 3),
+            Text(label, style: AppText.micro.copyWith(color: color)),
           ],
         ),
       ),

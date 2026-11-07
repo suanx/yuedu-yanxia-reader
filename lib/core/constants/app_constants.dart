@@ -5,8 +5,21 @@ abstract final class AppConstants {
 
   static const double cardRadius = 18.0;
   static const double coverRadius = 12.0;
-  static const double pagePadding = 20.0;
-  static const double gridGap = 14.0;
+  static const double pagePadding = 18.0;
+  static const double gridGap = 12.0;
+
+  /// 统一间距刻度：页面里只允许用这几档，杜绝 3/5/9/22/26 这种散值
+  static const double s4 = 4.0;
+  static const double s6 = 6.0;
+  static const double s8 = 8.0;
+  static const double s12 = 12.0;
+  static const double s16 = 16.0;
+  static const double s20 = 20.0;
+  static const double s24 = 24.0;
+  static const double s28 = 28.0;
+  static const double s32 = 32.0;
+  /// 列表底部留白：底栏是浮层，内容要滚到它上面
+  static const double bottomSafe = 100.0;
 
   static const Duration animFast = Duration(milliseconds: 220);
   static const Duration animMed = Duration(milliseconds: 360);

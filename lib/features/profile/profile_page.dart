@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:yuedu/core/constants/app_constants.dart';
 import 'package:yuedu/core/theme/app_theme.dart';
+import 'package:yuedu/widgets/glass.dart';
 
 /// 「我」：设置入口占位
 class ProfilePage extends StatelessWidget {
@@ -16,66 +18,78 @@ class ProfilePage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: AppTheme.pageBg,
-      appBar: AppBar(title: const Text('我')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: AppTheme.cardBg,
-              borderRadius: AppTheme.radius18,
-              boxShadow: AppTheme.cardElevation(context),
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const GlassHeader(title: '我'),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppConstants.pagePadding,
+                  AppConstants.s4,
+                  AppConstants.pagePadding,
+                  AppConstants.bottomSafe,
+                ),
+                children: [
+                  GlassCard(
+                    radius: 18,
+                    opacity: 0.66,
+                    padding: const EdgeInsets.all(AppConstants.s16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 26,
+                          backgroundColor: AppTheme.brandSoft,
+                          child: Icon(Icons.person_rounded,
+                              size: 28, color: AppTheme.brand),
+                        ),
+                        const SizedBox(width: AppConstants.s12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('书友',
+                                style: AppText.title.copyWith(fontSize: 15)),
+                            const SizedBox(height: 3),
+                            Text('点击登录，同步书架与听书进度',
+                                style: AppText.caption),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.s16),
+                  for (final e in items)
+                    GlassCard(
+                      margin: const EdgeInsets.only(
+                        bottom: AppConstants.s12,
+                      ),
+                      radius: 16,
+                      opacity: 0.56,
+                      padding: EdgeInsets.zero,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppConstants.s16,
+                          vertical: AppConstants.s4,
+                        ),
+                        leading: Icon(e.$1, color: AppTheme.brand, size: 20),
+                        title: Text(e.$2, style: AppText.title),
+                        subtitle: e.$3.isNotEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(e.$3, style: AppText.caption),
+                              )
+                            : null,
+                        trailing: const Icon(Icons.chevron_right_rounded,
+                            size: 19, color: AppTheme.textSecondary),
+                        onTap: () {},
+                      ),
+                    ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: AppTheme.brandSoft,
-                  child: Icon(Icons.person_rounded,
-                      size: 30, color: AppTheme.brand),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('书友',
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 4),
-                    Text('点击登录，同步书架与听书进度',
-                        style: TextStyle(
-                            fontSize: 12, color: AppTheme.textSecondary)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          ...items.map((e) => Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: AppTheme.cardBg,
-                  borderRadius: AppTheme.radius14,
-                  boxShadow: AppTheme.cardElevation(context),
-                ),
-                child: ListTile(
-                  leading: Icon(e.$1, color: AppTheme.brand, size: 21),
-                  title: Text(e.$2,
-                      style: const TextStyle(
-                          fontSize: 14.5, fontWeight: FontWeight.w500)),
-                  subtitle: e.$3.isNotEmpty
-                      ? Text(e.$3,
-                          style: const TextStyle(
-                              fontSize: 11.5, color: AppTheme.textSecondary))
-                      : null,
-                  trailing: const Icon(Icons.chevron_right_rounded,
-                      color: AppTheme.textSecondary),
-                  onTap: () {},
-                ),
-              )),
-        ],
+          ],
+        ),
       ),
     );
   }
