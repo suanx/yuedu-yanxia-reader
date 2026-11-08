@@ -77,13 +77,24 @@ class PageBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: Stack(
-        children: [
-          const Positioned.fill(child: PageBackdrop()),
-          Positioned.fill(child: child),
-        ],
-      ),
+    // 用 LayoutBuilder 把尺寸显式写死，不依赖父级给的是 tight 还是 loose：
+    // Scaffold.body 在嵌套 Scaffold 下偶尔会给出 0 高，导致 CustomScrollView
+    // 的 sliver 完全不 build（页面空白）。
+    return LayoutBuilder(
+      builder: (context, c) {
+        final w = c.maxWidth.isFinite ? c.maxWidth : MediaQuery.sizeOf(context).width;
+        final h = c.maxHeight.isFinite ? c.maxHeight : MediaQuery.sizeOf(context).height;
+        return SizedBox(
+          width: w,
+          height: h,
+          child: Stack(
+            children: [
+              const Positioned.fill(child: PageBackdrop()),
+              Positioned.fill(child: child),
+            ],
+          ),
+        );
+      },
     );
   }
 }

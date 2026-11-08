@@ -90,7 +90,7 @@ jobs:
             echo "::error::EXIT analyze=$A test=$T"
             {
               grep -E "error •|Error:|error:" /tmp/analyze.log | head -6
-              grep -E "FAILED|Exception|Expected:|Actual:|error:" /tmp/test.log | head -6
+              grep -E "FAILED|Exception|Expected:|Actual:|error:|DIAG" /tmp/test.log | head -10
             } | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
               | while IFS= read -r l; do echo "::error::$l"; done
             echo "::error::ANALYZE_TAIL $(tail -1 /tmp/analyze.log | sed 's/%/%25/g')"

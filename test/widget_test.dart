@@ -56,6 +56,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // 诊断信息：CI 失败时回传，直接看清树里到底有哪些文字 / 控件
+    // ignore: avoid_print
+    print('DIAG textfields=${find.byType(TextField).evaluate().length}');
+    // ignore: avoid_print
+    print('DIAG texts=' +
+        tester
+            .widgetList<Text>(find.byType(Text))
+            .map((w) => w.data)
+            .whereType<String>()
+            .toList()
+            .toString());
+
     // 发现页：用「页面专属、底栏没有」的节点证明内容真的渲染了。
     // 不能用 hintText（TextField 的 hint 不是独立 Text widget），
     // 也不能只靠「发现」（底栏也有），否则塌缩时会误判通过。
