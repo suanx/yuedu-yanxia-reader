@@ -84,10 +84,27 @@ void main() {
       expect(find.text(label), findsWidgets);
     }
 
-    // 书架页：书名 + 进度
+    // 书架页：GridView 本身必须有非零高度（lazy 格子依赖这个高度才会 build）
     await tester.tap(find.byIcon(Icons.auto_stories_outlined));
     await tester.pumpAndSettle();
-    expect(find.text('薄雾来信'), findsWidgets);
+    // ignore: avoid_print
+    print('DIAG2 grid=' +
+        find.byType(GridView).evaluate().length.toString() +
+        ' size=' +
+        (find.byType(GridView).evaluate().isNotEmpty
+            ? tester.getSize(find.byType(GridView)).toString()
+            : 'none'));
+    // ignore: avoid_print
+    print('DIAG2 texts=' +
+        tester
+            .widgetList<Text>(find.byType(Text))
+            .map((w) => w.data)
+            .whereType<String>()
+            .toList()
+            .toString());
+    expect(find.byType(GridView), findsOneWidget);
+    expect(tester.getSize(find.byType(GridView)).height, greaterThan(100));
+    expect(find.text('书架'), findsWidgets);
 
     // 看一看页
     await tester.tap(find.byIcon(Icons.visibility_outlined));

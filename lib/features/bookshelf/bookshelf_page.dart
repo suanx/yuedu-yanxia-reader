@@ -27,7 +27,10 @@ class BookshelfPage extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Padding(
+            // 必须 Positioned.fill：Stack 给非定位 child 的是宽松约束，
+            // 里面的 Expanded(GridView) 会拿不到确定高度，格子全不 build。
+            Positioned.fill(
+              child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: hPad),
               child: Column(
                 children: [
@@ -73,6 +76,7 @@ class BookshelfPage extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
             ),
             if (editing && selected.isNotEmpty)
               Positioned(
