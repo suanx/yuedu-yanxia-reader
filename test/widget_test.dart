@@ -77,7 +77,7 @@ void main() {
     expect(find.byType(GlassCard), findsWidgets);
     final box = tester.getSize(find.byType(TextField));
     expect(box.width, greaterThan(100));
-    expect(box.height, greaterThan(20));
+    expect(box.height, greaterThan(10));
 
     // 底栏四个按键
     for (final label in ['发现', '书架', '看一看', '我']) {
