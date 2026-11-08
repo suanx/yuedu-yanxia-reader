@@ -56,13 +56,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 发现页：标题、搜索框、分区、玻璃卡片
-    expect(find.text('发现'), findsWidgets);
-    expect(find.text('搜索书籍'), findsOneWidget);
-    expect(find.text('每日推荐'), findsWidgets);
+    // 发现页：用「页面专属、底栏没有」的节点证明内容真的渲染了。
+    // 不能用 hintText（TextField 的 hint 不是独立 Text widget），
+    // 也不能只靠「发现」（底栏也有），否则塌缩时会误判通过。
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('为你挑的今日好书'), findsOneWidget);
     expect(find.text('新书速递'), findsOneWidget);
     expect(find.byType(GlassCard), findsWidgets);
-    final box = tester.getSize(find.byType(GlassCard).first);
+    final box = tester.getSize(find.byType(TextField));
     expect(box.width, greaterThan(100));
     expect(box.height, greaterThan(20));
 
@@ -84,6 +85,6 @@ void main() {
     // 我的页
     await tester.tap(find.byIcon(Icons.person_outline_rounded));
     await tester.pumpAndSettle();
-    expect(find.text('听书设置'), findsOneWidget);
+    expect(find.text('听书设置'), findsWidgets);
   });
 }
