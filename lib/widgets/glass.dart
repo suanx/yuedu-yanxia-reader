@@ -63,6 +63,31 @@ class _Blob extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------- 页面容器
+
+/// 铺满可用空间的「光斑背景 + 页面内容」容器。
+///
+/// 关键：两个 child 都用 [Positioned.fill]，因此页面层拿到的是 tight 约束。
+/// 直接把 IndexedStack 丢进 Stack 会收到 loose 约束而塌缩成 0 高，
+/// 表现为「整页空白、只剩底栏」——这个坑踩过一次，别再退回去。
+class PageBackground extends StatelessWidget {
+  const PageBackground({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: Stack(
+        children: [
+          const Positioned.fill(child: PageBackdrop()),
+          Positioned.fill(child: child),
+        ],
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------- 玻璃卡片
 
 /// 通用玻璃容器。用于搜索框、推荐大卡、看一看卡片、我的设置项等。

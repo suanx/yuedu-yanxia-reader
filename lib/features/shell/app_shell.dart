@@ -22,24 +22,20 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(tabIndexProvider);
 
-    // body 延伸到底栏后面，BackdropFilter 才有内容可糊；
-    // 各 tab 页自身背景透明，露出下面这层柔和光斑。
+    // 页面层必须由 [PageBackground] 用 Positioned.fill 包住，
+    // 否则 IndexedStack 在宽松约束下会塌缩，四个 tab 的内容全部不渲染。
     return Scaffold(
-      extendBody: true,
       backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          const PageBackdrop(),
-          IndexedStack(
-            index: index,
-            children: const [
-              DiscoverPage(),
-              BookshelfPage(),
-              FeedPage(),
-              ProfilePage(),
-            ],
-          ),
-        ],
+      body: PageBackground(
+        child: IndexedStack(
+          index: index,
+          children: const [
+            DiscoverPage(),
+            BookshelfPage(),
+            FeedPage(),
+            ProfilePage(),
+          ],
+        ),
       ),
       bottomNavigationBar: GlassBottomBar(
         index: index,
