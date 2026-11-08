@@ -18,25 +18,26 @@ class AppShell extends ConsumerWidget {
     GlassTabItem('我', Icons.person_outline_rounded, Icons.person_rounded),
   ];
 
+  static const _pages = [
+    DiscoverPage(),
+    BookshelfPage(),
+    FeedPage(),
+    ProfilePage(),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(tabIndexProvider);
 
-    // 页面层必须由 [PageBackground] 用 Positioned.fill 包住，
-    // 否则 IndexedStack 在宽松约束下会塌缩，四个 tab 的内容全部不渲染。
+    // 只渲染当前页，不用 IndexedStack：
+    //   · IndexedStack 把所有页面包在 Offstage 里，配合 Stack 的宽松约束
+    //     曾导致页面层塌缩成 0 高，真机上表现为「整页空白、只剩底栏」；
+    //   · 现在页面由 [PageBackground] 的 Positioned.fill 拿到 tight 约束，
+    //     且不在任何 Offstage 之下，界面冒烟测试也能直接断言到内容节点。
+    // 代价是切换 tab 时页面重建（滚动位置不保留），此处可接受。
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: PageBackground(
-        child: IndexedStack(
-          index: index,
-          children: const [
-            DiscoverPage(),
-            BookshelfPage(),
-            FeedPage(),
-            ProfilePage(),
-          ],
-        ),
-      ),
+      body: PageBackground(child: _pages[index]),
       bottomNavigationBar: GlassBottomBar(
         index: index,
         onTap: (i) => ref.read(tabIndexProvider.notifier).state = i,
